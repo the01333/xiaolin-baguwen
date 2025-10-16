@@ -1,0 +1,60 @@
+1. 说一下 Spring Boot 自动装配原理
+    主要通过一系列条件注解、@EnableAutoConfiguration 注解和 spring.factories 文件实现的;
+    1️⃣条件注解: @ConditionalOn... 为前缀的注解
+    2️⃣@EnableAutoConfiguration: 自动装配的核心注解, 通常和 @SpringBootApplication 一起使用; 
+SpringBootApplication = @ComponentScan + @Configuration + @EnableAutoConfiguration;
+    3️⃣spring.factories: Spring Boot 用这个文件列出所有自动配置类, 这个文件位于每个自动配置模块的 META-INF 目录下, 
+Spring Boot 在启动时会扫描并加载这些文件中列出的所有自动配置类
+    - 工作流程: 
+        （1）扫描 spring.factories 文件, 列出所有自动配置类;
+        （2）尝试加载这些自动配置类;
+        （3）评估类上的条件注解, 条件满足则应用;
+        （4）最终会应用到 Spring 容器中, 注册成对应的 Bean
+        
+2. 介绍一下 Spring 的 ioc 控制反转
+    控制反转是把对象的创建和依赖关系的管理交给 Spring ioc 容器, 提高代码的模块化和可维护性; 
+ioc 的主要实现是依赖注入（构造函数注入、Setter方法注入、字段注入）
+
+3. 什么是依赖注入
+    依赖注入是 Spring 实现 ioc 的主要手段, 主要是把对象的创建和依赖关系的管理从对象内部抽离出来, 通过外部注入的方式提供给对象;
+这样对象的创建和管理交由 Spring 容器负责, 而不是由对象本身负责
+
+4. Bean 的作用范围和生命周期
+    - 作用范围:
+        singleton、prototype、request、session、globalsession、application
+    - 生命周期:
+        实例化、属性设置、初始化、使用、销毁
+
+5. 什么是循环依赖、怎么解决的
+    - 概念:
+        存在两个或多个 Bean 之间相互依赖, 形成闭环（如 A 依赖 B, B 又依赖 A）;
+    - 解决方法:
+        Spring 依靠三级缓存来解决, 一级缓存存放初始化好的单例 Bean, 二级缓存存放早期暴露的 Bean 实例, 三级缓存存放 Bean 工厂（主要用于创建 Bean 的代理对象）;
+    比如现在以 A、B 两个相互依赖的 Bean 为例, 创建 A 时, 去一到三级缓存找是否存在 A, 如果存在直接获取, 否则开始实例化 A, 把 A 的 ObjectFactory 放入三级缓存, 
+    属性设置 A 时发现需要 B, 同样去一到三级缓存找, 如果没有也要先实例化; 然后开始实例化 B, 把 B 的 ObjectFactory 放入三级缓存, 
+    属性设置 B 时发现需要 A, 从一找到三级缓存, 三级缓存存在, 调用工厂生成 A 的引用, 把 A 放入二级缓存并删除三级缓存里的 A;
+    这时 B 拿到 A 后初始化完成, 把自身放入一级缓存, 并清理其他缓存里的 B（如果存在的话）; 这时继续创建 A, 发现一级缓存中有 B, 
+    获取后成功初始化 A, 放入一级缓存中, 并删除二级缓存里的 A
+
+6. Spring 事务的失效场景
+    1️⃣非 public 方法使用 @Transactional
+    2️⃣同类的非事务方法调用事务方法
+    3️⃣事务属性设置不当
+    4️⃣异常类型不匹配
+    等等
+
+7. Spring 中用到了哪些设计模式
+    1️⃣工厂模式: 
+        BeanFactory、ApplicationContext
+    2️⃣单例模式:
+        Spring 默认以单例模式管理 Bean
+    3️⃣代理模式:
+        Spring AOP
+    4️⃣模板方法模式:
+        RestTemplate、JdbcTemplate 等
+    5️⃣观察者模式:
+        Spring 的事件处理机制, ApplicationEventPublisher 和 ApplicationListener 是具体实现的核心接口
+    6️⃣依赖注入模式:
+        Spring 的核心功能, 构造函数注入、Setter 方法注入和字段注入
+    7️⃣策略模式:
+        Spring 的 TransactionManager
