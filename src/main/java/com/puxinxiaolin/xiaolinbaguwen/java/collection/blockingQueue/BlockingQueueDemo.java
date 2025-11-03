@@ -4,6 +4,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 阻塞队列实现生产者-消费者模式
+ */
 public class BlockingQueueDemo {
     public static void main(String[] args) {
         BlockingQueue<Integer> queue = new LinkedBlockingQueue<>();

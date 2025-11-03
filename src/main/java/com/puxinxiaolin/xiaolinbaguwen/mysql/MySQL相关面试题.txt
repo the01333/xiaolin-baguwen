@@ -102,4 +102,34 @@
         （4）执行器: 操作引擎, 返回结果
     3️⃣存储引擎层:
         存储数据, 提供读写接口
-    
+
+12. 什么是深分页, 常见的解决方案有哪些
+    - 概念:
+        深分页指的是通过 limit 去进行分页查询时, 偏移量过大的问题;
+        - 详细补充: 
+            对于 limit M, N， 数据库需要扫描前 M + N 条数据, 然后丢弃前 M 条数据, 只返回后的 N 条数据, 随着 M 的增大, 
+            扫描的数据量会变大, 导致查询效率下降;
+    - 解决方案:
+        深分页的优化主要集中在避免全表扫描和利用索引快速定位;
+        （1）依赖主键 / 唯一索引进行优化（推荐）
+            如果主键 ID 是递增的, 记住上一页最后一条记录的主键值, 下一页查询直接用范围查询;
+            ```sql
+            select * 
+            from table t 
+            where expire_time < :threshold and id > :last_id 
+            order by id 
+            limit :page_size;
+            ```
+        （2）覆盖索引进行优化
+            先通过覆盖索引查询出需要的数据的主键值, 然后再通过主键值批量查询完整的行数据;
+            ```sql
+            select * 
+            from table t join (
+                select id
+                from table t
+                where expire_time < :threshold
+                order by id
+                limit M, N
+            ) t2
+            on t.id = t2.id;
+            ```
