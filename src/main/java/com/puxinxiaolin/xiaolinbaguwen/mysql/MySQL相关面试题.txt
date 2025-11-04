@@ -35,7 +35,7 @@
      - 核心实现原理:
         1️⃣隐藏列: 每行数据除了定义的字段外, 还维护三个隐藏字段 - DB_TRX_ID、DB_ROLL_PTR、DB_ROW_ID;
         2️⃣Undo Log: 事务在修改数据时, 会把旧值写入 Undo Log, 形成版本链, 之后可以通过 DB_ROLL_PTR 回溯旧版本;
-        3️⃣Read View: 事务在执行快照读时, 会生成一个 Read View, 它记录哪些事务已提交、哪些未提交, 
+        3️⃣Read View: 事务在执行快照读时, 会生成一个 Read View, 它记录哪些事务已提交、哪些未提交,
         其中有四个关键字段 - m_ids（当前活跃/未提交的事务 ID 列表）、min_trx_id、max_trx_id、creator_trx_id
         事务读取记录时, Read View 是否可见的判断逻辑:
             （1）如果记录的 DB_TRX_ID < min_trx_id, 说明该事务在当前事务开启前已启动 -> 可见
